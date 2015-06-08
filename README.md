@@ -15,13 +15,13 @@ open experiments.ipynb
 
 to use GPU, you will need to change a line in *-solver.prototxt
 
-## to run openFramworks app
+## to run openFrameworks app
 
 install [openFrameworks][3]
 
 copy feature-feedback/openFrameworks/apps/feedbackh into openFrameworks apps directory
 
-Windows: follow the instructions to set up codeblocks and use the included codeblocks workspace
+Windows: follow the [instructions][http://openframeworks.cc/setup/codeblocks/] to set up codeblocks and use the included codeblocks workspace
 
 Linux: build with make. Makefile.config may need to be updated with cnpy.h. Watch out for old versions of OpenGL, I know the open source AMD drivers won't work (need OpenGl 3.1/GLSL 1.4 +)
 
