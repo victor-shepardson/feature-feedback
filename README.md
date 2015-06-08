@@ -27,6 +27,8 @@ Linux: build with make. Makefile.config may need to be updated with cnpy.h. Watc
 
 OSX: you're on your own, probably need to figure out how to convert to xcode project
 
+To do much, you'll want to edit some constants in src/ofApp.cpp and/or hack on bin/data/shader/feedbackh.frag
+
 
 [1]: http://caffe.berkeleyvision.org/ "Caffe Deep learning framework by the BVLC"
 
