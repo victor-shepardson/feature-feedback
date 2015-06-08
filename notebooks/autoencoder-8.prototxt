@@ -1,0 +1,236 @@
+name: "ConvolutionalAutoencoder"
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mean_file: "../../caffe/examples/cifar10/mean.binaryproto"
+    scale: .00390625
+  }
+  data_param {
+    source: "../../caffe/examples/cifar10/cifar10_train_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mean_file: "../../caffe/examples/cifar10/mean.binaryproto"
+    scale: .00390625
+  }
+  data_param {
+    source: "../../caffe/examples/cifar10/cifar10_test_lmdb"
+    batch_size: 100
+    backend: LMDB
+  }
+}
+
+layer {
+  name: "encode1"
+  type: "Convolution"
+  bottom: "data"
+  top: "encode1"
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    pad: 2
+    num_output: 12
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: .1
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "encode1neuron"
+  type: "TanH"
+  bottom: "encode1"
+  top: "encode1neuron"
+  #relu_param{
+  #  negative_slope: .01
+  #}
+}
+
+layer {
+  name: "pool1"
+  type: "Pooling"
+  bottom: "encode1neuron"
+  top: "pool1"
+  pooling_param{
+    pad: 0
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+
+layer {
+  name: "encode2"
+  type: "Convolution"
+  bottom: "pool1"
+  top: "encode2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  convolution_param {
+    pad: 2
+    num_output: 48
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: .1
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "encode2neuron"
+  type: "TanH"
+  bottom: "encode2"
+  top: "encode2neuron"
+  #relu_param{
+  #  negative_slope: .01
+  #}
+}
+
+layer {
+  name: "pool2"
+  type: "Pooling"
+  bottom: "encode2neuron"
+  top: "pool2"
+  pooling_param{
+    pad: 0
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+  }
+}
+
+layer {
+  name: "decode2"
+  type: "Deconvolution"
+  bottom: "pool2"
+  top: "decode2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 1
+    decay_mult: 0
+  }
+  convolution_param {
+    pad: 2
+    num_output: 12
+    kernel_size: 6
+    stride: 2
+    weight_filler {
+      type: "gaussian"
+      std: .1
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "decode2neuron"
+  type: "TanH"
+  bottom: "decode2"
+  top: "decode2neuron"
+  #relu_param{
+  #  negative_slope: .01
+  #}
+}
+
+layer {
+  name: "decode1"
+  type: "Deconvolution"
+  bottom: "decode2neuron"
+  top: "decode1"
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    pad: 2
+    num_output: 3
+    kernel_size: 6
+    stride: 2
+    weight_filler {
+      type: "gaussian"
+      std: .1
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "decode1neuron"
+  type: "TanH"
+  bottom: "decode1"
+  top: "decode1neuron"
+  #relu_param{
+  #  negative_slope: .01
+  #}
+}
+
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "decode1neuron"
+  bottom: "data"
+  top: "l2_error1"
+  loss_weight: 0
+}
+
+layer {
+  name: "loss"
+  type: "EuclideanLoss"
+  bottom: "pool1"
+  bottom: "decode2neuron"
+  top: "l2_error2"
+  loss_weight: 1
+}
